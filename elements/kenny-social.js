@@ -30,13 +30,11 @@ export class KennySocial extends DDDSuper(LitElement) {
     css`
       :host {
         display: block;
-        background-color: var(--ddd-theme-default-navy80);
-        color: var(--ddd-theme-default-white);
-        margin-top: var(--ddd-spacing-8);
+        background-color: var(--ddd-theme-default-roarLight);
+        color: var(--ddd-theme-default-potentialMidnight);
       }
       .social-wrapper {
         max-width: 1200px;
-        margin: 0 auto;
         padding: var(--ddd-spacing-4);
         text-align: center;
       }
@@ -45,20 +43,20 @@ export class KennySocial extends DDDSuper(LitElement) {
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        gap: var(--ddd-spacing-4);
+        gap: var(--ddd-spacing-2);
       }
       .social-links {
         display: flex;
-        gap: var(--ddd-spacing-3);
+        gap: var(--ddd-spacing-8);
       }
       .social-link {
-        color: var(--ddd-theme-default-skyBlue);
+        color: var(--ddd-theme-default-landgrantBrown);
         text-decoration: none;
         font-size: var(--ddd-font-size-l);
         transition: color 0.3s ease;
       }
       .social-link:hover {
-        color: var(--ddd-theme-default-white);
+        color: var(--ddd-theme-default-potentialMidnight);
       }
       .team-name {
         font-size: var(--ddd-font-size-m);
@@ -71,7 +69,7 @@ export class KennySocial extends DDDSuper(LitElement) {
       <div class="social-wrapper">
         <div class="social-content">
           <div class="team-name">
-            ${this.year} Kenny's Emporium
+           © ${this.year} Kenny's Emporium
           </div>
           <div class="social-links">
             <a href="#" class="social-link"> Facebook</a>

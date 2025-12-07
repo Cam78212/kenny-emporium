@@ -16,7 +16,7 @@ class KennyCarousel extends LitElement {
       overflow: hidden;
       border: 1px solid var(--ddd-theme-default-potentialMidnight);
       border-radius: 8px;
-      background-color: var(--ddd-theme-default-beaver70);
+      background-color: var(--ddd-theme-default-landgrantBrown);
     }
     ::slotted(figure[active]) {
       display: block;

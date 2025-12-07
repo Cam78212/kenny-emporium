@@ -54,10 +54,11 @@ export class KennyApp extends DDDSuper(I18NMixin(LitElement)) {
         color: var(--ddd-theme-primary);
         background-color: var(--ddd-theme-accent);
         font-family: var(--ddd-font-navigation);
+        border-radius: var(--ddd-radius-lg);
       }
-      .wrapper {
-        margin: var(--ddd-spacing-2);
+      .body{
         padding: var(--ddd-spacing-4);
+        margin: 0;
       }
       h3 span {
         font-size: var(--kenny-app-label-font-size, var(--ddd-font-size-s));
@@ -85,50 +86,81 @@ export class KennyApp extends DDDSuper(I18NMixin(LitElement)) {
   renderPage() {
     switch (this.route) {
       case "/schedule":
-        return html`<kenny-page page="schedule"></kenny-page>`;
+        return html`
+        <kenny-page page="Schedule">
+          <h2>Full Schedule</h2>
+          <kenny-calendar></kenny-calendar>
+
+          <p>Events coming up!</p>
+          <kenny-event></kenny-event>
+          <kenny-event></kenny-event>
+          <kenny-event></kenny-event>
+        </kenny-page>
+      `;
       case "/team":
-        return html`<kenny-page page="team"></kenny-page>`;
+        return html`
+        <kenny-page page="team">
+          <h2>Meet the Team!</h2>
+          <p>Our amazing players and staff who make everything possible.</p>
+          <kenny-image src="/api/kenny-images.json"></kenny-image>
+        </kenny-page>`;
       case "/about":
-        return html`<kenny-page page="about"></kenny-page>`;
+        return html`
+        <kenny-page page="about">
+          <h2>About Kenny Sports</h2>
+          <p>Kenny Sports is dedicated to promoting sportsmanship, teamwork, and excellence in athletics. 
+            Our mission is to provide a supportive environment for athletes of all levels to grow and succeed.</p>
+          <kenny-image src="/api/kenny-images.json"></kenny-image>
+        </kenny-page>`;
       default:
-        return html`<kenny-page page="home"></kenny-page>`;
+        return html`
+          <kenny-page page="home">
+            <h2>Welcome to Kenny Sports!</h2>
+
+            <kenny-carousel>
+              <kenny-image src="/api/kenny-images.json"></kenny-image>
+            </kenny-carousel>
+
+            <p>Check out our upcoming events:</p>
+            <kenny-calendar></kenny-calendar>
+          </kenny-page>
+        `;
+
     }
   }
   
   // Lit render the HTML
   render() {
     return html`
+      <div class="header">
+        <kenny-banner>
+          <kenny-animated 
+            link="/about"
+            slot="logo" 
+            src="https://www.dictionary.com/e/wp-content/uploads/2018/05/cross-mark.png"
+            hoveredSrc="https://cdn-icons-png.flaticon.com/256/8631/8631570.png">
+          </kenny-animated>
+          <kenny-button slot="buttons" label="Schedule" link="/schedule">
+            <a href="/schedule/games">Games</a>
+            <a href="/schedule/practice">Practice</a>
+          </kenny-button>
+          <kenny-button slot="buttons" label="Team" link="/team">
+            <a href="/team/roster">Roster</a>
+            <a href="/team/coaches">Coaches</a>
+          </kenny-button>
+          <kenny-button slot="buttons" label="About" link="/about">
+            <a href="/team/Contact">Contact</a>
+            <a href="/team/mission_statement">Mission Statement</a>
+          </kenny-button>
+        </kenny-banner>
+      </div>
 
-    <kenny-banner>
-      <kenny-animated 
-        link="/about"
-        slot="logo" 
-        src="https://www.dictionary.com/e/wp-content/uploads/2018/05/cross-mark.png"
-        hoveredSrc="https://cdn-icons-png.flaticon.com/256/8631/8631570.png">
-      </kenny-animated>
-      <kenny-button slot="buttons" label="Schedule" link="/schedule">
-        <a href="/schedule/games">Games</a>
-        <a href="/schedule/practice">Practice</a>
-      </kenny-button>
-      <kenny-button slot="buttons" label="Team" link="/team">
-        <a href="/team/roster">Roster</a>
-        <a href="/team/coaches">Coaches</a>
-      </kenny-button>
-      <kenny-button slot="buttons" label="About" link="/about">
-        <a href="/team/Contact">Contact</a>
-        <a href="/team/mission_statement">Mission Statement</a>
-      </kenny-button>
-    </kenny-banner>
-
-      <div class="wrapper">
-  
-        <kenny-carousel>
-          <kenny-image src="/api/kenny-images.json"></kenny-image>
-        </kenny-carousel>
-        <kenny-social></kenny-social>
-  
+      <div class="body">
         ${this.renderPage()}
-  
+      </div>
+
+      <div class="footer">
+         <kenny-social></kenny-social>
       </div>
     `;
   }
