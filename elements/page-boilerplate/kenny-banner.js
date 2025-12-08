@@ -17,13 +17,57 @@ export class KennyBanner extends DDDSuper(I18NMixin(LitElement)) {
 
     constructor() {
         super();
+        this.mobileMenuOpen = false;
+        this.isMobile = window.matchMedia("(max-width: 768px)").matches;
+        
+        this._handleResize = this._handleResize.bind(this);
+        this._handleButtonClick = this._handleButtonClick.bind(this);
     }
 
     // Lit reactive properties
     static get properties() {
         return {
             ...super.properties,
+            mobileMenuOpen: { type: Boolean, reflect: true, attribute: 'mobile-menu-open' },
+            isMobile: { type: Boolean }
         };
+    }
+
+    connectedCallback() {
+        super.connectedCallback();
+        this._mediaQuery = window.matchMedia("(max-width: 768px)");
+        this._mediaQuery.addEventListener('change', this._handleResize);
+        this.addEventListener('kenny-button-click', this._handleButtonClick);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this._mediaQuery?.removeEventListener('change', this._handleResize);
+        this.removeEventListener('kenny-button-click', this._handleButtonClick);
+    }
+
+    _handleResize(e) {
+        this.isMobile = e.matches;
+        // Close mobile menu when switching to desktop
+        if (!e.matches && this.mobileMenuOpen) {
+            this.mobileMenuOpen = false;
+        }
+    }
+
+    _toggleMobileMenu() {
+        this.mobileMenuOpen = !this.mobileMenuOpen;
+    }
+
+    _handleButtonClick(e) {
+        // Close all other dropdowns when one is clicked
+        const clickedButton = e.detail.button;
+        const buttons = this.querySelectorAll('kenny-button');
+        
+        buttons.forEach(button => {
+            if (button !== clickedButton) {
+                button.closeDropdown();
+            }
+        });
     }
 
     // Lit scoped styles
@@ -54,11 +98,42 @@ export class KennyBanner extends DDDSuper(I18NMixin(LitElement)) {
                 align-items: center;
                 gap: var(--ddd-spacing-4);
             }
-            ::slotted(kenny-logo) {
-                display: block;
+            .mobile-menu-toggle {
+                display: none;
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: var(--ddd-spacing-2);
+                color: var(--ddd-theme-default-potentialMidnight);
+                font-size: var(--ddd-font-size-xl);
+                min-width: 44px;
+                min-height: 44px;
             }
-            ::slotted(kenny-button) {
-                display: inline-block;
+
+            /* Mobile styles */
+            @media (max-width: 768px) {
+                .header {
+                    flex-wrap: wrap;
+                    padding: var(--ddd-spacing-3) var(--ddd-spacing-4);
+                }
+                .mobile-menu-toggle {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .nav-right {
+                    display: none;
+                    width: 100%;
+                    flex-direction: column;
+                    gap: var(--ddd-spacing-2);
+                    margin-top: var(--ddd-spacing-3);
+                }
+                :host([mobile-menu-open]) .nav-right {
+                    display: flex;
+                }
+                ::slotted([slot="buttons"]) {
+                    width: 100%;
+                }
             }
         `];
     }
@@ -70,6 +145,13 @@ export class KennyBanner extends DDDSuper(I18NMixin(LitElement)) {
                 <div class="nav-left">
                     <slot name="logo"></slot>
                 </div>
+                <button 
+                    class="mobile-menu-toggle"
+                    @click="${this._toggleMobileMenu}"
+                    aria-label="Toggle menu"
+                    aria-expanded="${this.mobileMenuOpen}">
+                    ${this.mobileMenuOpen ? '✕' : '☰'}
+                </button>
                 <div class="nav-right">
                     <slot name="buttons"></slot>
                 </div>

@@ -95,8 +95,8 @@ export class KennyApp extends DDDSuper(I18NMixin(LitElement)) {
           <kenny-event></kenny-event>
           <kenny-event></kenny-event>
           <kenny-event></kenny-event>
-        </kenny-page>;
-      `}
+        </kenny-page>`;
+      }
       if (this.route.startsWith("/team")) {
         return html`
         <kenny-page page="team">
@@ -134,20 +134,23 @@ export class KennyApp extends DDDSuper(I18NMixin(LitElement)) {
       <div class="header">
         <kenny-banner>
           <kenny-animated 
-            link="/about"
+            link="/home"
             slot="logo" 
             src="${kennyHome1}"
             hoveredSrc="${kennyHome2}">
           </kenny-animated>
           <kenny-button slot="buttons" label="Schedule" link="/schedule">
+            <a href="/schedule">Schedule Page</a>
             <a href="/schedule/games">Games</a>
             <a href="/schedule/practice">Practice</a>
           </kenny-button>
           <kenny-button slot="buttons" label="Team" link="/team">
+            <a href="/team">Team Page</a>
             <a href="/team/roster">Roster</a>
             <a href="/team/coaches">Coaches</a>
           </kenny-button>
           <kenny-button slot="buttons" label="About" link="/about">
+            <a href="/about">About Page</a>
             <a href="/team/Contact">Contact</a>
             <a href="/team/mission_statement">Mission Statement</a>
           </kenny-button>

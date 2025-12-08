@@ -22,7 +22,11 @@ export class KennyButton extends DDDSuper(I18NMixin(LitElement)) {
         super();
         this.label = "";
         this.link = "/";
-        this.isHovered = false;
+        this.isOpen = false;
+        this.isMobile = window.matchMedia("(max-width: 768px)").matches;
+        
+        this._handleResize = this._handleResize.bind(this);
+        this._handleClickOutside = this._handleClickOutside.bind(this);
     }
 
     // Lit reactive properties
@@ -31,116 +35,188 @@ export class KennyButton extends DDDSuper(I18NMixin(LitElement)) {
             ...super.properties,
             label: { type: String },
             link: { type: String },
-            isHovered: { type: Boolean, reflect: true }
+            isOpen: { type: Boolean, reflect: true },
+            isMobile: { type: Boolean }
         };
     }
 
-    // Lit scoped styles
-static get styles() {
-    return [super.styles,
-    css`
-        :host {
-            display: inline-block;
-            position: relative;
+    connectedCallback() {
+        super.connectedCallback();
+        this._mediaQuery = window.matchMedia("(max-width: 768px)");
+        this._mediaQuery.addEventListener('change', this._handleResize);
+        document.addEventListener('click', this._handleClickOutside);
+    }
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        this._mediaQuery?.removeEventListener('change', this._handleResize);
+        document.removeEventListener('click', this._handleClickOutside);
+    }
+
+    _handleResize(e) {
+        this.isMobile = e.matches;
+        if (this.isOpen) {
+            this.isOpen = false;
         }
-        .button-container {
-            display: flex;
-            align-items: center;
-            gap: var(--ddd-spacing-2);
-            padding: var(--ddd-spacing-3) var(--ddd-spacing-4);
-            background-color: var(--ddd-theme-default-beaver70);
-            border: none;
-            border-radius: var(--ddd-radius-sm);
-            cursor: pointer;
-            font-family: var(--ddd-font-navigation);
-            font-size: var(--ddd-font-size-m);
-            color: var(--ddd-theme-default-potentialMidnight);
-            text-decoration: none;
-            transition: background-color 0.3s ease;
+    }
+
+    _handleClickOutside(e) {
+        // Only handle click-outside on mobile
+        if (!this.isMobile || !this.isOpen) return;
+        
+        // Check if click is outside this component
+        if (!e.composedPath().includes(this)) {
+            this.isOpen = false;
         }
-        .button-container:hover {
-            background-color: var(--ddd-theme-default-beaver80);
-        }
-        .dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            min-width: 200px;
-            background-color: var(--ddd-theme-default-white);
-            border: 1px solid var(--ddd-theme-default-coalyGray);
-            border-radius: var(--ddd-radius-sm);
-            box-shadow: var(--ddd-boxShadow-md);
-            display: none;
-            flex-direction: column;
-            z-index: 1000;
-            margin-top: 0;
-        }
-        :host([is-hovered]) .dropdown {
-            display: flex;
-        }
-        :host(:hover) .dropdown {
-            display: flex;
-        }
-        ::slotted(a) {
-            display: block;
-            padding: var(--ddd-spacing-3) var(--ddd-spacing-4);
-            color: var(--ddd-theme-default-potentialMidnight);
-            text-decoration: none;
-            font-family: var(--ddd-font-navigation);
-            font-size: var(--ddd-font-size-s);
-            transition: background-color 0.2s ease;
-            border-bottom: 1px solid var(--ddd-theme-default-limestoneGray);
-        }
-        ::slotted(a:last-child) {
-            border-bottom: none;
-        }
-        ::slotted(a:hover) {
-            background-color: var(--ddd-theme-default-limestoneLight);
-        }
-    `];
-}
+    }
 
     _handleMouseEnter() {
-        this.isHovered = true;
+        // Only open on hover for desktop
+        if (!this.isMobile) {
+            this.isOpen = true;
+        }
     }
 
     _handleMouseLeave() {
-        this.isHovered = false;
+        // Only close on mouse leave for desktop
+        if (!this.isMobile) {
+            this.isOpen = false;
+        }
     }
 
-    _handleClick(e) {
-        // Navigate to the main link
-        window.dispatchEvent(new CustomEvent('navigate', {
-            detail: { path: this.link },
-            bubbles: true,
-            composed: true
-        }));
+    _handleButtonClick(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // On mobile, toggle the dropdown and dispatch event to close others
+        if (this.isMobile) {
+            const wasOpen = this.isOpen;
+            
+            // Dispatch event to close all other dropdowns
+            this.dispatchEvent(new CustomEvent('kenny-button-click', {
+                bubbles: true,
+                composed: true,
+                detail: { button: this }
+            }));
+            
+            this.isOpen = !wasOpen;
+        }
+    }
+
+    // Lit scoped styles
+    static get styles() {
+        return [super.styles,
+        css`
+            :host {
+                display: inline-block;
+                position: relative;
+            }
+            .button-container {
+                display: flex;
+                align-items: center;
+                gap: var(--ddd-spacing-2);
+                padding: var(--ddd-spacing-3) var(--ddd-spacing-4);
+                background-color: var(--ddd-theme-default-roarLight);
+                border: none;
+                border-radius: var(--ddd-radius-sm);
+                cursor: pointer;
+                font-family: var(--ddd-font-navigation);
+                font-size: var(--ddd-font-size-m);
+                color: var(--ddd-theme-default-potentialMidnight);
+                text-decoration: none;
+                transition: background-color 0.3s ease;
+                min-height: 44px;
+                box-sizing: border-box;
+            }
+            .button-container:hover {
+                background-color: var(--ddd-theme-default-beaver70);
+            }
+            .dropdown {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                min-width: 200px;
+                background-color: var(--ddd-theme-default-white);
+                border: 1px solid var(--ddd-theme-default-coalyGray);
+                border-radius: var(--ddd-radius-sm);
+                box-shadow: var(--ddd-boxShadow-md);
+                display: none;
+                flex-direction: column;
+                z-index: 1000;
+            }
+            .dropdown.open {
+                display: flex;
+            }
+            ::slotted(a) {
+                display: block;
+                padding: var(--ddd-spacing-3) var(--ddd-spacing-4);
+                color: var(--ddd-theme-default-potentialMidnight);
+                text-decoration: none;
+                font-family: var(--ddd-font-navigation);
+                font-size: var(--ddd-font-size-s);
+                transition: background-color 0.2s ease;
+                border-bottom: 1px solid var(--ddd-theme-default-limestoneGray);
+                min-height: 44px;
+                box-sizing: border-box;
+                display: flex;
+                align-items: center;
+            }
+            ::slotted(a:last-child) {
+                border-bottom: none;
+            }
+            ::slotted(a:hover) {
+                background-color: var(--ddd-theme-default-limestoneLight);
+            }
+
+            /* Mobile styles */
+            @media (max-width: 768px) {
+                :host {
+                    display: block;
+                    width: 100%;
+                }
+                .button-container {
+                    width: 100%;
+                    justify-content: space-between;
+                }
+                .dropdown {
+                    width: 100%;
+                    left: 0;
+                    right: 0;
+                    min-width: unset;
+                }
+            }
+        `];
     }
 
     // Lit render the HTML
-render() {
-    return html`
-        <div 
-            class="hover-container"
-            @mouseenter="${this._handleMouseEnter}"
-            @mouseleave="${this._handleMouseLeave}">
-            <a 
-                class="button-container"
-                href="${this.link}"
-                @click="${this._handleClick}">
-                <span>${this.label}</span>
-                <kenny-animated 
-                    .isHovered="${this.isHovered}"
-                    src="${kennyUp}"
-                    hoveredSrc="${kennyDown}">
-                </kenny-animated>
-            </a>
-            <div class="dropdown">
-                <slot></slot>
+    render() {
+        return html`
+            <div 
+                class="hover-container"
+                @mouseenter="${this._handleMouseEnter}"
+                @mouseleave="${this._handleMouseLeave}">
+                <button 
+                    class="button-container"
+                    @click="${this._handleButtonClick}"
+                    aria-expanded="${this.isOpen}"
+                    aria-haspopup="true">
+                    <span>${this.label}</span>
+                    <kenny-animated 
+                        .isHovered="${this.isOpen}"
+                        src="${kennyUp}"
+                        hoveredSrc="${kennyDown}">
+                    </kenny-animated>
+                </button>
+                <div class="dropdown ${this.isOpen ? 'open' : ''}" role="menu">
+                    <slot></slot>
+                </div>
             </div>
-        </div>
-    `;
-}
+        `;
     }
+
+    closeDropdown() {
+        this.isOpen = false;
+    }
+}
 
 globalThis.customElements.define(KennyButton.tag, KennyButton);
